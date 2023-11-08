@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 import com.github.javafaker.Faker;
@@ -33,4 +34,34 @@ public class UserService {
 	   findAny().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
        String.format("USER %S NOT FOUND", username)));
    }
+   
+   public User CreateUser(User userAux) {
+		if(users.stream().anyMatch(u->u.getUserName().equals(userAux.getUserName()))) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,String.format("User %s already exist", userAux.getUserName()));
+		}
+		else {
+		users.add(userAux);
+		return userAux;
+		}
+	}
+   
+	public User updtateUser(User user,String username ) {
+		   User userToBeUpdated = getUserByUsername(username);
+		   userToBeUpdated.setNickName(user.getNickName());
+		   userToBeUpdated.setPassword(user.getPassword());
+		   return userToBeUpdated;
+		}
+	public void deleteUser (String username ) {
+		   User userToBeUpdated = getUserByUsername(username);
+		   users.remove(userToBeUpdated);
+		}
+	public List<User> getUsersSearch(String starwith) {
+		if(starwith != null) {
+		    return users.stream().filter(u->u.getUserName().startsWith(starwith)).collect(Collectors.toList());	
+		}
+		else {
+		return users;
+		}
+	}
+   
 }
